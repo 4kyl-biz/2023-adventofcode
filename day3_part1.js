@@ -212,19 +212,66 @@ const convertTo2DArray = (array) => {
         result.push(array.slice(i, i + numberOfColumns));
     }
 
-    return result;
+      return result;
 };
 const convertInputStringInto2DArray = (inputString) => {
     const array = convertToArray(inputString);
     const matrix = convertTo2DArray(array);
-
+    
     return matrix;
 }
 
 // 2. Find the coordinate of numbers, create a key-value pair where key is the number and value is the coordinate
-const getCoordinateMap = (inputArray) => {
-    const result = {};
+const isNumeric = (str) => {
+    return !isNaN(str) && !isNaN(parseFloat(str));
+}
 
+const findCoordinates = (inputString, rowIndex) => {
+    const result = [];
+    let currentSequence = [];
+    let currentCoordinates = [];
+
+    for (let i = 0; i < inputString.length; i++) {
+        const currentChar = inputString[i];
+
+        if (isNumeric(currentChar)) {
+            // If the character is a digit, add it to the current sequence
+            currentSequence.push(currentChar);
+            currentCoordinates.push([rowIndex, i])
+        } else {
+            // If the character is not a digit, check if there's a valid sequence
+            if (currentSequence.length > 0) {
+                const number = currentSequence.join('');
+                result.push({[number]: currentCoordinates})
+
+                currentSequence = [];
+                currentCoordinates = [];
+            }
+        }
+    }
+
+    // Check for any remaining sequence at the end of the string
+    if (currentSequence.length > 0) {
+        const number = currentSequence.join('');
+        result.push({[number]: currentCoordinates})
+    }
+    
+    console.log(result)
+    
+    return result;
+}
+
+const getAllCoordinates = (inputArray) => {
+    const result = [];
+    
+    inputArray.forEach((row, rowIndex) => {
+        const coordinates = findCoordinates(row, rowIndex);
+        
+        if (coordinates.length > 0) {
+            result.push(coordinates)
+        }
+    })
+    
     return result;
 };
 
@@ -240,11 +287,11 @@ const isValidCoordinate = (coordinate, map) => {
 // 5. Return the sum of the valid numbers
 const getResult = (testCase) => {
     const inputArray = convertInputStringInto2DArray(testCase);
-    const coordinateMap = getCoordinateMap(inputArray);
-    return inputArray;
+    const coordinates = getAllCoordinates(inputArray);
+    return coordinates;
 };
 
 // Verify Result
 const testCase = testCase1;
 const finalResult = getResult(testCase);
-console.log({ finalResult });
+console.log({finalResult});
